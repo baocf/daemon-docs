@@ -1,1 +1,9 @@
-site_name: My Docs
+site_name: Daemon Docs
+
+nav:
+   - Home: index.md
+   - Markdown Guide: markdown.md
+   - MySQL Statistics: mysql_statistic.md
+   - User Operator: users_operator.md
+
+theme:  readthedocs
