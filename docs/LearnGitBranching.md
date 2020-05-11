@@ -187,6 +187,12 @@
 
   
 
+  ##### git tag   -d  v1.0   删除本地的tag 
+
+  ##### git push origin :refs/tags/v1.0   //删除远程的tag
+
+  
+
 - Git Descibe
 
   由于标签在代码库中起着“锚点”的作用，Git 还为此专门设计了一个命令用来**描述**离你最近的锚点（也就是标签），它就是 `git describe`！
@@ -391,21 +397,295 @@ sh)这个分支并申请pull request,但是你忘记并直接提交给了master.
   对于接下来这个工作流，我们集成了两个步骤：
 
   - 将特性分支集成到 `master` 上
+  
   - 推送并更新远程分支
+  
+    
+  
+  ```git pull --rebase; git push```
+  
+  我们执行了两个命令:
+  
+  - 将我们的工作 rebase 到远程分支的最新提交记录
+  - 向远程仓库推送我们的工作
 
-
+​	
 
 - 合并远程分支
+
+  在开发社区里，有许多关于 merge 与 rebase 的讨论。以下是关于 rebase 的优缺点：
+
+  优点:
+
+  - Rebase 使你的提交树变得很干净, 所有的提交都在一条线上
+
+  缺点:
+
+  - Rebase 修改了提交树的历史
+
+  比如, 提交 C1 可以被 rebase 到 C3 之后。这看起来 C1 中的工作是在 C3 之后进行的，但实际上是在 C3 之前。
+
+  一些开发人员喜欢保留提交历史，因此更偏爱 merge。而其他人（比如我自己）可能更喜欢干净的提交树，于是偏爱 rebase。仁者见仁，智者见智。
+
 - 远程追踪
+
+  Git 好像知道 `master` 与 `o/master` 是相关的。当然这些分支的名字是相似的，可能会让你觉得是依此将远程分支 master 和本地的 master 分支进行了关联。这种关联在以下两种情况下可以清楚地得到展示：
+
+  - pull 操作时, 提交记录会被先下载到 o/master 上，之后再合并到本地的 master 分支。隐含的合并目标由这个关联确定的。
+  - push 操作时, 我们把工作从 `master` 推到远程仓库中的 `master` 分支(同时会更新远程分支 `o/master`) 。这个推送的目的地也是由这种关联确定的！
+
+
+
+​		直接了当地讲，`master` 和 `o/master` 的关联关系就是由分支的“remote tracking”属性决定的。`master` 被设定为跟踪 `o/master` —— 这意味着为 `master` 分支指定了推送的目的地以及拉取后合并的目标。
+
+​		你可能想知道 `master` 分支上这个属性是怎么被设定的，你并没有用任何命令指定过这个属性呀！好吧, 当你克隆仓库的时候, Git 就自动帮你把这个属性设置好了。
+
+​		当你克隆时, Git 会为远程仓库中的每个分支在本地仓库中创建一个远程分支（比如 `o/master`）。然后再创建一个跟踪远程仓库中活动分支的本地分支，默认情况下这个本地分支会被命名为 `master`。
+
+​		克隆完成后，你会得到一个本地分支（如果没有这个本地分支的话，你的目录就是“空白”的），但是可以查看远程仓库中所有的分支（如果你好奇心很强的话）。这样做对于本地仓库和远程仓库来说，都是最佳选择。
+
+​		这也解释了为什么会在克隆的时候会看到下面的输出：
+
+```
+	local branch "master" set to track remote branch "o/master"
+```
+
+
+
+##### 		我能自己指定这个属性吗？
+
+​		当然可以啦！你可以让任意分支跟踪 `o/master`, 然后该分支会像 `master` 分支一样得到隐含的 push 目的地以及 merge 的目标。 这意味着你可以在分支 `totallyNotMaster` 上执行 `git push`，将工作推送到远程仓库的 `master` 分支上。
+
+​			有两种方法设置这个属性，第一种就是通过远程分支检出一个新的分支，执行:
+
+```
+git checkout -b totallyNotMaster o/master
+```
+
+​			就可以创建一个名为 `totallyNotMaster` 的分支，它跟踪远程分支 `o/master`。
+
+​	
+
+我们检出一个名叫 `foo` 的新分支，让其跟踪远程仓库中的 `master`
+
+```git checkout -b foo o/master; git pull```
+
+正如你所看到的, 我们使用了隐含的目标 `o/master` 来更新 `foo` 分支。需要注意的是 master 并未被更新！
+
+
+
+git push 同样适用
+
+```git checkout -b foo o/master; git commit; git push```
+
+我们将一个并不叫 `master` 的分支上的工作推送到了远程仓库中的 `master` 分支上
+
+
+
+### 第二种方法
+
+另一种设置远程追踪分支的方法就是使用：`git branch -u` 命令，执行：
+
+```
+git branch -u o/master foo
+```
+
+这样 `foo` 就会跟踪 `o/master` 了。如果当前就在 foo 分支上, 还可以省略 foo：
+
+```
+git branch -u o/master
+```
+
+
+
+跟之前一样, 但这个命令更明确！
+
 - Git Push的参数1
+
+  首先来看 `git push`。在远程跟踪课程中，你已经学到了 Git 是通过当前检出分支的属性来确定远程仓库以及要 push 的目的地的。这是未指定参数时的行为，我们可以为 push 指定参数，语法是：
+
+  ```
+  git push <remote> <place>
+  ```
+
+  `<place>` 参数是什么意思呢？我们稍后会深入其中的细节, 先看看例子, 这个命令是:
+
+  ```
+  git push origin master
+  ```
+
+  把这个命令翻译过来就是：
+
+  **切到本地仓库中的“master”分支，获取所有的提交，再到远程仓库“origin”中找到“master”分支，将远程仓库中没有的提交记录都添加上去，搞定之后告诉我。**
+
+  我们通过“place”参数来告诉 Git 提交记录来自于 master, 要推送到远程仓库中的 master。它实际就是要同步的两个仓库的位置。
+
+  需要注意的是，因为我们通过指定参数告诉了 Git 所有它需要的信息, 所以它就忽略了我们所检出的分支的属性！  
+
 - Git Push的参数2
+
+  当为 git push 指定 place 参数为 `master` 时，我们同时指定了提交记录的来源和去向。
+
+  你可能想问 —— 如果来源和去向分支的名称不同呢？比如你想把本地的 `foo` 分支推送到远程仓库中的 `bar` 分支。
+
+  要同时为源和目的地指定 `<place>` 的话，只需要用冒号 `:` 将二者连起来就可以了：
+
+  ```
+  git push origin <source>:<destination>
+  ```
+
+  这个参数实际的值是个 refspec，“refspec” 是一个自造的词，意思是 Git 能识别的位置（比如分支 `foo` 或者 `HEAD~1`）
+
+  一旦你指定了独立的来源和目的地，就可以组织出言简意赅的远程操作命令了
+
+
+
+​	记住，`source` 可以是任何 Git 能识别的位置：
+
+​	```git push origin foo^:master```
+
+​	这是个另人困惑的命令，但是它确实是可以运行的 —— Git 将 `foo^` 解析为一个位置，上传所有未被包含到远	程仓库里 `master` 分支中的提交记录。
+
+​	如果你要推送到的目的分支不存在会怎么样呢？没问题！Git 会在远程仓库中根据你提供的名称帮你创建这个分	支！
+
+​	```git push origin master:newBranch```
+
+​	很赞吧！它是不是很聪明？！
+
+
+
+
+
 - Git Fetch的参数
+
+  学习了 git push 的参数，很酷的 `<place>` 参数，还有用冒号分隔的 refspecs（`<source>:<destination>`）。 这些参数可以用于 `git fetch` 吗？
+
+  你猜中了！`git fetch` 的参数和 `git push` 极其相似。他们的概念是相同的，只是方向相反罢了（因为现在你是下载，而非上传）
+
+  ### `<place>` 参数
+
+  如果你像如下命令这样为 git fetch 设置 <place> 的话：
+
+  ```
+  git fetch origin foo
+  ```
+
+  Git 会到远程仓库的 `foo` 分支上，然后获取所有本地不存在的提交，放到本地的 `o/foo` 上。
+
+  
+
+  通过指定 place...
+
+  git fetch origin foo
+
+  我们只下载了远程仓库中 `foo` 分支中的最新提交记录，并更新了 o/foo
+
+
+
+​		“如果我们指定 `<source>:<destination>` 会发生什么呢？”
+
+​		如果你觉得直接更新本地分支很爽，那你就用冒号分隔的 refspec 吧。不过，你不能在当前检出的分支上干这个事，但是其它分支是可以的。
+
+​		这里有一点是需要注意的 —— `source` 现在指的是远程仓库中的位置，而 `<destination>` 才是要放置提交		的本地仓库的位置。它与 git push 刚好相反，这是可以讲的通的，因为我们在往相反的方向传送数据。
+
+​		理论上虽然行的通，但开发人员很少这么做。我在这里介绍它主要是为了从概念上说明 `fetch` 和 `push` 的相似性，只是方向相反罢了。
+
+
+
+​		来看个疯狂的例子：
+
+​		```git fetch origin foo~1:bar```
+
+​		哇! 看见了吧, Git 将 `foo~1` 解析成一个 origin 仓库的位置，然后将那些提交记录下载到了本地的 `bar` 分支		（一个本地分支）上。注意由于我们指定了目标分支，`foo` 和 `o/foo` 都没有被更新。
+
+​		如果执行命令前目标分支不存在会怎样呢？我们看一下上个对话框中没有 bar 分支的情况。
+
+​		```git fetch origin foo~1:bar```
+
+​		看见了吧，跟 git push 一样，Git 会在 fetch 前自己创建立本地分支, 就像是 Git 在 push 时，如果远程仓库中		不存在目标分支，会自己在建立一样
+
+
+
+​		没有参数呢?
+
+​		如果 `git fetch` 没有参数，它会下载所有的提交记录到各个远程分支……
+
+​		```git fetch```
+
+​		相当简单，但是仅需更新一次，值得你去做！
+
+
+
 - 没有source的source
+
+  ​	古怪的 `<source>`
+
+  Git 有两种关于 `<source>` 的用法是比较诡异的，即你可以在 git push 或 git fetch 时不指定任何 `source`，方法就是仅保留冒号和 destination 部分，source 部分留空。
+
+  - `git push origin :side`
+  - `git fetch origin :bugFix`
+
+  我们分别来看一下这两条命令的作用……
+
+  
+
+  如果 push 空 <source> 到远程仓库会如何呢？它会删除远程仓库中的分支！
+
+  ```git push origin :foo```
+
+  就是这样子, 我们通过给 push 传空值 source，成功删除了远程仓库中的 `foo` 分支, 这真有意思...
+
+
+
+​		如果 fetch 空 <source> 到本地，会在本地创建一个新分支。
+
+​		```git fetch origin :bar```
+
+​		很神奇吧！但无论怎么说, 这就是 Git！
+
+
+
 - Git Pull 的参数
 
+  因为 git pull 到头来就是 fetch 后跟 merge 的缩写。你可以理解为用同样的参数执行 git fetch，然后再 merge 你所抓取到的提交记录。
+
+  还可以和其它更复杂的参数一起使用, 来看一些例子:
 
 
 
+​		以下命令在 Git 中是等效的:
+
+​		```git pull origin foo``` 相当于：
+
+```
+git fetch origin foo; git merge o/foo
+```
+
+还有...
+
+`git pull origin bar~1:bugFix` 相当于：
+
+```
+git fetch origin bar~1:bugFix; git merge bugFix
+```
+
+看到了? git pull 实际上就是 fetch + merge 的缩写, git pull 唯一关注的是提交最终合并到哪里（也就是为 git fetch 所提供的 destination 参数）
+
+
+
+如果我们指定要抓取的 place，所有的事情都会跟之前一样发生，只是增加了 merge 操作
+
+```git pull origin master```
+
+看到了吧! 通过指定 `master` 我们更新了 `o/master`。然后将 `o/master` merge 到我们的检出位置，**无论**我们当前检出的位置是哪
+
+
+
+pull 也可以用 source:destination 吗? 当然喽, 看看吧:
+
+```git pull origin master:foo```
+
+哇, 这个命令做的事情真多。它先在本地创建了一个叫 `foo`的分支，从远程仓库中的 master 分支中下载提交记录，并合并到 `foo`，然后再 merge 到我们的当前检出的分支 `bar`上。操作够多的吧？！
 
 
 
