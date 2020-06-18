@@ -58,34 +58,37 @@ test.ewp ：工程名，注意是.ewp结尾的。
 
 
 
- ```powershell
-eg:
-@echo off
-set IAR_ARM_WORKBENCH_PATH=C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3
-set IAR_COMMON_PATH%IAR_ARM_WORKBENCH_PATH%\common\bin
-set IAR_TOOLCHAIN_PATH%IAR_ARM_WORKBENCH_PATH%\arm\bin
-set IAR_PRO_PATH=D:\...\..\..\..\iar\fd122.ewp
+1. **PC 本地IDE的编译支持，License配置；**
 
-echo Init building...
-::echo .>build_log.txt
+2. **构建IDE对应的编译脚本；**
 
-%IAR_COMMON_PATH%\IarBuild.exe  %IAR_PRO_PATH% -build Debug
+   ```powershell
+   eg:
+   @echo off
+   set IAR_ARM_WORKBENCH_PATH=C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3
+   set IAR_COMMON_PATH%IAR_ARM_WORKBENCH_PATH%\common\bin
+   set IAR_TOOLCHAIN_PATH%IAR_ARM_WORKBENCH_PATH%\arm\bin
+   set IAR_PRO_PATH=D:\...\..\..\..\iar\fd122.ewp
+   
+   echo Init building...
+   ::echo .>build_log.txt
+   
+   %IAR_COMMON_PATH%\IarBuild.exe  %IAR_PRO_PATH% -build Debug
+   
+   ::type build_log.txt
+   
+   echo Done.
+   ::pause
+   ```
 
-::type build_log.txt
+   
 
-echo Done.
-::pause
- ```
+3. **codeDex插件的安装(coverity2019.03)；**
 
+   1. {CI安装目录}/plugin/CodeDex_v3/tool/tools/coverity_xxxx\bin；
+   2. Coverity_xxx安装到指定的tools目录下；
 
-
-1. PC 本地IDE的编译支持，License配置；
-
-2. 构建IDE对应的编译脚本；
-
-3. codeDex插件的安装(coverity2019.03)；---{CI安装目录}/plugin/CodeDex_v3/tool/tools/coverity_xxxx\bin
-
-4. 安装指定的编译器类型，IAR对应的iccarm.
+4. **安装指定的编译器类型，IAR对应的iccarm.**
 
    cov_configure -lsct //查看Coverity工具支持的编译列表
 
@@ -93,7 +96,28 @@ echo Done.
 
    cov_configure --template --compiler iccarm --comptype iar
 
-5. Secsonar project 的创建，产品线的配置， 获取到 project_name & register_key
+   ```powershell
+   set CI_ROOT=D:\FD-IAR\ci\plugins
+   set COVERITY_HOME=%CI_ROOT%\CodeDEX_V3_Win64\CodeDEX_V3\tool\tools\coverity_2019.03
+   set COVERITY_TOOL=%CI_ROOT%\CodeDEX_V3_Win64\CodeDEX_V3\tool\7za\Windows
+   set PATH=%COVERITY_HOME%\bin；%PATH%
+   set language=c
+   
+   set inner_dir=D:\FD-IAR\ci\temp_aw70
+   set cov_tmp_dir=%inner_dir%\cov_tmp
+   
+   rmdir /q /s %inner_dir%
+   
+   call %COVERITY_HOME%\bin\cov_build.exe --dir %cov_tmp_dir% iar_build.bat
+   
+   cd /d %cov_tmp_dir%
+   %COVERITY_TOOL%\7za.exe a -tzip coverity.zip * -r
+   xcopy coverity.zip "%inner_dir%" /S /Q /Y /H /R /I
+   ```
+
+   coverity.zip解压后，目录里面有一个build-log.txt, 文件最后一行有显示扫描包的覆盖率
+
+5. SecSolar project 的创建，产品线的配置， 获取到 project_name & register_key
 
 6. 配置Jenkins  master job  task 创建。 添加slave node, 安装 coverity_phi插件，配置中间件及脚本， 报告的push规则；
 
