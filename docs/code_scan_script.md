@@ -77,3 +77,30 @@ echo Done.
 ::pause
  ```
 
+
+
+1. PC 本地IDE的编译支持，License配置；
+
+2. 构建IDE对应的编译脚本；
+
+3. codeDex插件的安装(coverity2019.03)；---{CI安装目录}/plugin/CodeDex_v3/tool/tools/coverity_xxxx\bin
+
+4. 安装指定的编译器类型，IAR对应的iccarm.
+
+   cov_configure -lsct //查看Coverity工具支持的编译列表
+
+   //IAR config
+
+   cov_configure --template --compiler iccarm --comptype iar
+
+5. Secsonar project 的创建，产品线的配置， 获取到 project_name & register_key
+
+6. 配置Jenkins  master job  task 创建。 添加slave node, 安装 coverity_phi插件，配置中间件及脚本， 报告的push规则；
+
+7. 任务构建，确保build.log扫描的覆盖率， 是否是95%+
+
+8. 完成代码扫描， 根据检测规则，进行代码扫描，处理解决或屏蔽漏洞；
+
+9. 通过Secsonar平台生成export code  报告；
+
+   
