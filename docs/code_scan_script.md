@@ -85,6 +85,12 @@ test.ewp ：工程名，注意是.ewp结尾的。
 
 3. **codeDex插件的安装(coverity2019.03)；**
 
+     base_package:   a. CodeDEX_V3;  b. jenkins master plugins for CodeDEX
+
+     
+
+     scan_tools:  Coverity_2019.03
+
    1. {CI安装目录}/plugin/CodeDex_v3/tool/tools/coverity_xxxx\bin；
    2. Coverity_xxx安装到指定的tools目录下；
 
@@ -126,5 +132,21 @@ test.ewp ：工程名，注意是.ewp结尾的。
 8. 完成代码扫描， 根据检测规则，进行代码扫描，处理解决或屏蔽漏洞；
 
 9. 通过Secsonar平台生成export code  报告；
+
+   
+
+   
+
+   
+
+   
+
+   
+
+   
+
+   
+
+   
 
    
