@@ -133,7 +133,7 @@ test.ewp ：工程名，注意是.ewp结尾的。
 
 9. 通过Secsonar平台生成export code  报告；
 
-   
+     
 
    
 
@@ -145,8 +145,139 @@ test.ewp ：工程名，注意是.ewp结尾的。
 
    
 
-   
+   - 涉及脚本
 
-   
+     coverity_build.bat
 
+     - IDE:
+   
+       iar_build.bat
+   
+       ```powershell
+       @echo off
+       set IAR_ARM_WORKBENCH_PATH=C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3
+       set IAR_COMMON_PATH%IAR_ARM_WORKBENCH_PATH%\common\bin
+       set IAR_TOOLCHAIN_PATH%IAR_ARM_WORKBENCH_PATH%\arm\bin
+       set IAR_PRO_PATH=D:\...\..\..\..\iar\fd122.ewp
+       
+       echo Init building...
+       ::echo .>build_log.txt
+       
+       %IAR_COMMON_PATH%\IarBuild.exe  %IAR_PRO_PATH% -build Debug
+       
+       ::type build_log.txt
+       
+       echo Done.
+       ::pause
+       ```
+   
+       
+   
+     - plugin1:
+   
+       coverity.bat
+   
+       ```powershell
+       @echo off
+       set JAVA_HOME=D:\java\jdk1.8.0_162
+       
+       set CI_ROOT=D:\FD-IAR\ci\plugins
+       set COVERITY_HOME=%CI_ROOT%\..\CodeDEX_V3\tool\tools\coverity_2019.03
+       set COVERITY_TOOL=%CI_ROOT%\..\CodeDEX_V3\tool\7za\Windows
+       set BINSCOPE_BIN=%CI_ROOT%\..\CodeDEX_V3\tool\tools\binscope_3.0.5
+       set CODEMARS_BIN=%CI_ROOT%\..\CodeDEX_V3\tool\tools\codemars_Newest
+       set SECMISSILE_BIN=%CI_ROOT%\..\CodeDEX_V3\tool\tools\secmissile
+       set SOURCE_SECOND_BIN=D:\FD_IAR\..\app_v3\iar\bin\freertos_amota.bin
+       set SOURCE_PATH=D:\FD_IAR\code\app_v3
+       set PATH=%BINSCOPE_BIN%\bin;%CODEMARS_BIN%\bin;%SECMISSILE_BIN%\bin;%COVERITY_HOME%\bin；%PATH%
+       set language=c
+       
+       set inner_dir=D:\FD-IAR\ci\temp_aw70
+       set cov_tmp_dir=%inner_dir%\cov_tmp
+       
+       rmdir /q /s %inner_dir%
+       
+       rem #################20200624 coverity_test ok################
+       call %COVERITY_HOME%\bin\cov_build.exe --dir %cov_tmp_dir% iar_build.bat
+       
+       cd /d %cov_tmp_dir%
+       %COVERITY_TOOL%\7za.exe a -tzip coverity.zip * -r
+       xcopy coverity.zip "%inner_dir%" /S /Q /Y /H /R /I
+       
+       rem #################20200701 binscope_test ok################
+       rem type1
+       %BINSCOPE_HOME%\binscope /d %SOURCE_SECOND_BIN%
+       rem binscope.zip 与 binscope.bat在用一级目录
+       move binscope.zip %inner_dir%
+       
+       rem type2
+       call binscope.bat
+       
+       rem #################20200702 codemars_test ok################
+       rem type1
+       rem -c 指c语言代码  -source 源代码的路径  -output 输出的报告文件   -codedexPrj SecSolar Portal 创建产品线工程名 
+       %CODEMARS_HOME%\CodeMars.bat  -c  -source  %SOURCE_PATH% -output  %inner_dir% -codedexPrj app_v3
+       rem type2
+       call codemars.bat
+       
+       ```
+   
+       
+   
+     - plugin2
+   
+       codemars.bat
+   
+       ```powershell
+       @echo off
+       set CODEMARS_HOME=..\..\coveDEX_v3\tool\tools\codemars_Newest
+       set SOURCE_PATH=D:\FD_IAR\code\app_v3
+       set PATH= %CODEMARS_HOME%:$PATH
+       set inner_dir=D:\FD-IAR\temp_v3
+       
+       rem -c 指c语言代码  -source 源代码的路径  -output 输出的报告文件   -codedexPrj SecSolar Portal 创建产品线工程名 
+       %CODEMARS_HOME%\CodeMars.bat  -c  -source  %SOURCE_PATH% -output  %inner_dir% -codedexPrj app_v3
+       
+       ```
+   
+       
+   
+       
+   
+     - plugin3
+   
+       binscope.bat
+   
+       ```powershell
+       @echo off
+       set BINSCOPE_HOME=..\..\coveDEX_v3\tool\tools\binscope_3.0.5
+       set SOURCE_SECOND_BIN=D:\FD_IAR\code\app_v3\iar\bin\freertos_amota.bin
+       set PATH= %BINSCOPE_HOME%:$PATH
+       set inner_dir=D:\FD-IAR\temp_v3
+       
+       %BINSCOPE_HOME%\binscope /d %SOURCE_SECOND_BIN%
+       
+       rem binscope.zip 与 binscope.bat在用一级目录
+       move binscope.zip %inner_dir%
+       
+       ```
+   
+       
+   
+       
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
    
