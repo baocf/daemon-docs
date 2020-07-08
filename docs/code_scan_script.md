@@ -137,26 +137,18 @@ test.ewp ：工程名，注意是.ewp结尾的。
 
    
 
-   
-
-   
-
-   
-
-   
-
    - 涉及脚本
 
      coverity_build.bat
 
      - IDE:
-   
+
        iar_build.bat
-   
+
        ```powershell
-       @echo off
+    @echo off
        set IAR_ARM_WORKBENCH_PATH=C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3
-       set IAR_COMMON_PATH%IAR_ARM_WORKBENCH_PATH%\common\bin
+    set IAR_COMMON_PATH%IAR_ARM_WORKBENCH_PATH%\common\bin
        set IAR_TOOLCHAIN_PATH%IAR_ARM_WORKBENCH_PATH%\arm\bin
        set IAR_PRO_PATH=D:\...\..\..\..\iar\fd122.ewp
        
@@ -202,7 +194,7 @@ test.ewp ：工程名，注意是.ewp结尾的。
        
        cd /d %cov_tmp_dir%
        %COVERITY_TOOL%\7za.exe a -tzip coverity.zip * -r
-       xcopy coverity.zip "%inner_dir%" /S /Q /Y /H /R /I
+       
        
        rem #################20200701 binscope_test ok################
        rem type1
@@ -219,15 +211,21 @@ test.ewp ：工程名，注意是.ewp结尾的。
        %CODEMARS_HOME%\CodeMars.bat  -c  -source  %SOURCE_PATH% -output  %inner_dir% -codedexPrj app_v3
        rem type2
        call codemars.bat
+       xcopy coverity.zip "%inner_dir%" /S /Q /Y /H /R /I
+       
+       
+       call secmissile.bat
        
        ```
-   
-       
-   
-     - plugin2
-   
-       codemars.bat
-   
+     ```
+     
+     
+     ```
+     
+   - plugin2
+     
+     codemars.bat
+     
        ```powershell
        @echo off
        set CODEMARS_HOME=..\..\coveDEX_v3\tool\tools\codemars_Newest
@@ -239,15 +237,15 @@ test.ewp ：工程名，注意是.ewp结尾的。
        %CODEMARS_HOME%\CodeMars.bat  -c  -source  %SOURCE_PATH% -output  %inner_dir% -codedexPrj app_v3
        
        ```
-   
-       
-   
-       
-   
-     - plugin3
-   
-       binscope.bat
-   
+     
+     
+     
+     
+     
+   - plugin3
+     
+     binscope.bat
+     
        ```powershell
        @echo off
        set BINSCOPE_HOME=..\..\coveDEX_v3\tool\tools\binscope_3.0.5
@@ -261,10 +259,28 @@ test.ewp ：工程名，注意是.ewp结尾的。
        move binscope.zip %inner_dir%
        
        ```
-   
+     
+     
+     
+       plugin4
+     
+       secmissile.bat 
+     
+       ```powershell
+       @echo off
        
-   
+       set SECMISSILE_HOME=..\..\coveDEX_v3\tool\tools\secmissile_19.10
+       set source_dir=D:\FD_IAR\code\app_v3
+       set inner_dir=D:\FD-IAR\temp_v3
+       set project_name=portal_project_name
        
+       cd %SECMISSILE_HOME%
+       SecMissile.bat "projectname=%project_name%@@sourcepath=%source_dir%@@indexpackagepath=%inner_dir%@@ipaddress@@multisourcepath@@pythonfiledir=%SECMISSILE_HOME%@@tool=hi"
+       
+       
+       ```
+     
+       备注： SecMissile.bat 脚本内部涉及到'exit'指令， 故该插件的调用只能放到最后一步运行；
    
    
    
