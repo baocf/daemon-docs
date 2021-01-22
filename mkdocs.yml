@@ -1,10 +1,20 @@
 site_name: Daemon Docs
 
 nav:
-   - Home: index.md
-   - Markdown Guide: markdown.md
-   - MySQL Statistics: mysql_statistic.md
-   - User Operator: users_operator.md
-   - Git Learning: Git_training_Agenda.md
-   - gitLearnBranching: LearnGitBranching.md
+- Home: index.md
+- Markdown Guide: markdown.md
+  # - 00Linux_ops:   
+  # - 01Api_design:
+  # - 02Dev_ools:
+  # - 03Laravel:  
+    - 04SCM: 
+        - 'Git_Traning': '04SCM/Git_training_Agenda.md' 
+        - 'Git_Tag_Notes': '04SCM/git_tag.md'
+  # - 05Code_Check:
+  # - 06Server_develop_module:
+ - 07Database: '07Database/mysql_statistic.md'    
+  # - 08webserver: 
+ - 09operator_metric: '09operator_metric/users_operator.md'
+  # - 10Job_description:
+  # - 11Soft_power_improvement:
 theme:  readthedocs
